@@ -49,15 +49,27 @@ def backwardProp(a, y):
 	grad = []
 	for cnt in range(L-1):
 		grad.append(np.dot(sens[cnt],np.insert(a[cnt],0,1,axis=0).T))
-	theta = [theta[i] - grad[i] for i in range(len(theta))]
+	return grad
+	#theta = [theta[i] - grad[i] for i in range(len(theta))]
+
+def train(x, y):
+	global theta
+	grad = [0*t for t in theta]
+	a = forwardPropOne(x)
+	print(a)
+	for cnt in range(len(y)):
+		a = forwardPropOne([[x[0][cnt]],[x[1][cnt]]])
+		g = backwardProp(a, y[cnt])
+		grad = [grad[i] + g[i] for i in range(len(g))]
+	theta = [theta[i] - grad[i]/len(y) for i in range(len(grad))]
+	a = forwardPropOne(x)
+	print(a)
+	a = forwardPropOne([[x[0][0]],[x[1][0]]])
+	print(a)
 
 def main():
 	initWeights()
 
 	x,y = [[0,0,1,1],[0,1,0,1]],[1,0,0,1]
-	a = forwardPropOne(x)
-	print(a)
-	backwardProp(a, y)
-	a = forwardPropOne(x)
-	print(a)
+	train(x,y)
 main()
