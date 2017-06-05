@@ -31,7 +31,7 @@ def forwardPropOne(x):
 	x = np.matrix(x)
 	a = [x]
 	for cnt in range(L-1):
-		x = sigmoid(theta[cnt]*(np.insert(x,0,[1]).T))
+		x = sigmoid(np.dot(theta[cnt],np.insert(x,0,1,axis=0)))
 		a.append(x)
 	return a
 
@@ -44,33 +44,20 @@ def backwardProp(a, y):
 	sens = [a[-1]-y] # sensitivities of the cost function to each pre-activation value
 					 # initialized with the last layer sensitivity of output - expected
 	for cnt in range(L-2, 0, -1):
-		sens.insert(0, np.multiply(theta[cnt].T[1:]*sens[0], np.multiply(a[cnt], 1-a[cnt])))
+		sens.insert(0, np.multiply(theta[cnt].T[1:]*sens[0], np.multiply(a[cnt],1-a[cnt])))
 
 	grad = []
 	for cnt in range(L-1):
-		grad.append(sens[cnt]*np.insert(a[cnt],0,1,axis=0).T)
+		grad.append(np.dot(sens[cnt],np.insert(a[cnt],0,1,axis=0).T))
 	theta = [theta[i] - grad[i] for i in range(len(theta))]
 
 def main():
 	initWeights()
 
-	x,y = [[0],[1]],[1]
+	x,y = [[0,0,1,1],[0,1,0,1]],[1,0,0,1]
 	a = forwardPropOne(x)
 	print(a)
 	backwardProp(a, y)
 	a = forwardPropOne(x)
-	backwardProp(a, y)
-	a = forwardPropOne(x)
-	backwardProp(a, y)
-	a = forwardPropOne(x)
-	backwardProp(a, y)
-	a = forwardPropOne(x)
-	backwardProp(a, y)
-	a = forwardPropOne(x)
-	backwardProp(a, y)
-	a = forwardPropOne(x)
-	backwardProp(a, y)
-	a = forwardPropOne(x)
 	print(a)
-	# forwardPropOne()
 main()
