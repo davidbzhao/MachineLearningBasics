@@ -8,9 +8,10 @@ import numpy as np
 from random import random
 from math import exp
 
-L = 3 # number of layers
-dim = [2,2,1] # size of each layer
+dim = [2,2,2,1] # size of each layer
+L = len(dim) # number of layers
 theta = [] # weights
+lam = 5 # regularization factor 
 
 # Initialize random weights for each layer
 # An additional bias node is prepended to the first layer in each pair of layers
@@ -18,7 +19,7 @@ theta = [] # weights
 #	as arrays of dimensions as such, [[2x5],[1x3]].
 def initWeights():
 	for cnt in range(L-1):
-		theta.append((np.random.rand(dim[cnt+1], dim[cnt]+1)-0.5)*20)
+		theta.append((np.random.rand(dim[cnt+1], dim[cnt]+1)-0.5)*10)
 
 # Apply a sigmoid function to an input z,
 # vectorized to work on numpy structures
@@ -28,7 +29,7 @@ sigmoid = np.vectorize(sigmoid)
 
 # Forward propagate with x, an input point
 def forwardPropOne(x):
-	x = np.matrix(x)
+	x = np.array(x)
 	a = [x]
 	for cnt in range(L-1):
 		x = sigmoid(np.dot(theta[cnt],np.insert(x,0,1,axis=0)))
@@ -44,32 +45,33 @@ def backwardProp(a, y):
 	sens = [a[-1]-y] # sensitivities of the cost function to each pre-activation value
 					 # initialized with the last layer sensitivity of output - expected
 	for cnt in range(L-2, 0, -1):
-		sens.insert(0, np.multiply(theta[cnt].T[1:]*sens[0], np.multiply(a[cnt],1-a[cnt])))
-
+		sens.insert(0, np.multiply(np.dot(theta[cnt].T[1:],sens[0]), np.multiply(a[cnt],1-a[cnt])))
 	grad = []
 	for cnt in range(L-1):
 		grad.append(np.dot(sens[cnt],np.insert(a[cnt],0,1,axis=0).T))
 	return grad
-	#theta = [theta[i] - grad[i] for i in range(len(theta))]
 
 def train(x, y):
-	global theta
 	grad = [0*t for t in theta]
-	a = forwardPropOne(x)
-	print(a)
-	for cnt in range(len(y)):
-		a = forwardPropOne([[x[0][cnt]],[x[1][cnt]]])
-		g = backwardProp(a, y[cnt])
-		grad = [grad[i] + g[i] for i in range(len(g))]
-	theta = [theta[i] - grad[i]/len(y) for i in range(len(grad))]
-	a = forwardPropOne(x)
-	print(a)
-	a = forwardPropOne([[x[0][0]],[x[1][0]]])
-	print(a)
+	reg = theta
+	m = len(y)
+	for i in range(m):
+		a = forwardPropOne([[x[0][i]], [x[1][i]]])
+		g = backwardProp(a,y[i])
+		grad = [grad[k] + g[k] for k in range(L-1)]
+	for i in range(L-1):
+		reg[i].T[0] = 0
+		theta[i] = theta[i] - 0.03*(grad[i]/m + lam*reg[i])
+	return
 
 def main():
 	initWeights()
 
-	x,y = [[0,0,1,1],[0,1,0,1]],[1,0,0,1]
+	# x,y = [[0,0,1,1],[0,1,0,1]],[1,0,0,1]
+	x,y = [[0,0,1,1],[0,1,0,1]],[0,0,0,1]
+	print(forwardPropOne(x))
+	print('theta',theta)
 	train(x,y)
+	print(forwardPropOne(x))
+	print('theta',theta)
 main()
