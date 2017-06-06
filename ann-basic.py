@@ -5,13 +5,13 @@
 # Implement a functional neural network
 
 import numpy as np
-from random import random
+from random import random, sample
 from math import exp
 
 dim = [2,2,2,1] # size of each layer
 L = len(dim) # number of layers
 theta = [] # weights
-lam = 5 # regularization factor 
+lam = 0.01 # regularization factor 
 
 # Initialize random weights for each layer
 # An additional bias node is prepended to the first layer in each pair of layers
@@ -19,7 +19,7 @@ lam = 5 # regularization factor
 #	as arrays of dimensions as such, [[2x5],[1x3]].
 def initWeights():
 	for cnt in range(L-1):
-		theta.append((np.random.rand(dim[cnt+1], dim[cnt]+1)-0.5)*10)
+		theta.append((np.random.rand(dim[cnt+1], dim[cnt]+1)-0.5)*5)
 
 # Apply a sigmoid function to an input z,
 # vectorized to work on numpy structures
@@ -62,16 +62,19 @@ def train(x, y):
 	for i in range(L-1):
 		reg[i].T[0] = 0
 		theta[i] = theta[i] - 0.03*(grad[i]/m + lam*reg[i])
+		# print(forwardPropOne(x))
 	return
 
 def main():
 	initWeights()
 
 	# x,y = [[0,0,1,1],[0,1,0,1]],[1,0,0,1]
-	x,y = [[0,0,1,1],[0,1,0,1]],[0,0,0,1]
-	print(forwardPropOne(x))
+	x = [[n/1000 for n in sample(range(10000),100)], [n/1000 for n in sample(range(10000),100)]]
+	y = [((x[0][i] > 0.5) + (x[1][i] > 0.5)) % 2 == 0 for i in range(len(x[0]))]
+	# x,y = [[0,0,1,1],[0,1,0,1]],[0,0,0,1]
+	print(forwardPropOne([[0.75],[0.25]]))
 	print('theta',theta)
 	train(x,y)
-	print(forwardPropOne(x))
+	print(forwardPropOne([[0.75],[0.25]]))
 	print('theta',theta)
 main()
