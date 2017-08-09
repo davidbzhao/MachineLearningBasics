@@ -26,11 +26,9 @@ class Clusterer:
             centroids = _train[:nCentroids]
             prev_cost = -1
             buckets, centroids, cost = self.bucketAndUpdate(_train, centroids)
-            print(cost)
             while prev_cost != cost:
                 prev_cost = cost
                 buckets, centroids, cost = self.bucketAndUpdate(_train, centroids)
-                # print(cost)
             cv_cost = self.cost(_cv, centroids)
             if cv_cost < best_cost:
                 best_cost = cv_cost
@@ -45,8 +43,14 @@ class Clusterer:
             costs = np.sum((_train[n] - centroids) ** 2, axis=1)
             buckets[np.argmin(costs)].append(_train[n])
             cost += np.min(costs)
-        for n in range(len(buckets)):
-            centroids[n] = np.average(np.vstack(buckets[n]), axis=0)
+        n = 0
+        while n < len(buckets):
+            if len(buckets[n]) == 0:
+                del buckets[n]
+                np.delete(centroids, n, axis=0)
+            else:
+                centroids[n] = np.average(np.vstack(buckets[n]), axis=0)
+                n += 1
         return buckets, centroids, cost
 
     def cost(self, points, centroids):
@@ -59,7 +63,8 @@ class Clusterer:
 
 points = generateRandomPoints()
 clusterer = Clusterer()
-centroids, test_cost = clusterer.cluster(points)
+centroids, test_cost = clusterer.cluster(points, 5)
+print(centroids.shape)
 print(test_cost)
 buckets, tmp, points = clusterer.bucketAndUpdate(points, centroids)
 for n in range(len(buckets)):
