@@ -4,18 +4,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def generateRandomPoints(nClusters=5, nPerCluster=100):
-    x = []
-    y = []
+    points = []
     for n in range(nClusters):
-        x.append(np.random.normal(loc=20*(np.random.random() - 0.5), scale=1.5, size=nPerCluster))
-        y.append(np.random.normal(loc=20*(np.random.random() - 0.5), scale=1.5, size=nPerCluster))
-    return np.hstack(x), np.hstack(y)
+        x = np.random.normal(loc=20*(np.random.random() - 0.5), scale=1.5, size=nPerCluster)
+        y = np.random.normal(loc=20*(np.random.random() - 0.5), scale=1.5, size=nPerCluster)
+        points.append(np.vstack([x,y]).T)
+    points = np.vstack(points)
+    return points
 
 class Clusterer:
-    def cluster(self, x, y, nCentroids=10):
+    def cluster(self, points, nCentroids=10):
+        # shuffle data
+        np.random.shuffle(points)
         # allocate data - 60% to training
         #                 20% to cross-validation
         #                 20% to test
+        _train, _cv, _test = np.split(points, [int(points.shape[0] * 0.6), int(points.shape[0] * 0.8)])
+
         # for 25 times:
         #   randomly initialize centroids
         #   calculate cost and gradient
@@ -26,6 +31,7 @@ class Clusterer:
         #   calculate cost on cross-validation set
         # return set of centroids with lowest cost
 
-x, y = generateRandomPoints()
-plt.plot(x, y, 'bo')
+points = generateRandomPoints()
+Clusterer().cluster(points)
+plt.plot(points[:,0], points[:,1], 'bo')
 plt.show()
