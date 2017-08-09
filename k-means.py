@@ -6,8 +6,8 @@ import numpy as np
 def generateRandomPoints(nClusters=5, nPerCluster=100):
     points = []
     for n in range(nClusters):
-        x = np.random.normal(loc=20*(np.random.random() - 0.5), scale=1.5, size=nPerCluster)
-        y = np.random.normal(loc=20*(np.random.random() - 0.5), scale=1.5, size=nPerCluster)
+        x = np.random.normal(loc=20*(np.random.random() - 0.5), size=nPerCluster)
+        y = np.random.normal(loc=20*(np.random.random() - 0.5), size=nPerCluster)
         points.append(np.vstack([x,y]).T)
     points = np.vstack(points)
     return points
@@ -60,14 +60,19 @@ class Clusterer:
             cost += np.min(costs)
         return cost
 
-
-points = generateRandomPoints()
-clusterer = Clusterer()
-centroids, test_cost = clusterer.cluster(points, 5)
-print(centroids.shape)
-print(test_cost)
-buckets, tmp, points = clusterer.bucketAndUpdate(points, centroids)
-for n in range(len(buckets)):
-    bucket_points = np.vstack(buckets[n])
-    plt.plot(bucket_points[:,0], bucket_points[:,1], 'o')
-plt.show()
+def main():
+    points = generateRandomPoints()
+    clusterer = Clusterer()
+    centroids, test_cost = clusterer.cluster(points, 5)
+    print(centroids.shape)
+    print(test_cost)
+    buckets, tmp, points = clusterer.bucketAndUpdate(points, centroids)
+    for n in range(len(buckets)):
+        bucket_points = np.vstack(buckets[n])
+        plt.scatter(bucket_points[:,0], bucket_points[:,1], s=10)
+    plt.title('K-Means Clustering')
+    plt.text(0, 0, 'Error : ' + str(test_cost))
+    plt.plot(centroids[:,0], centroids[:,1], 'k^')
+    plt.axis('equal')
+    plt.show()
+main()
